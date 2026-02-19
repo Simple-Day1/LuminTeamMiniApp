@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LuminTeam — инди‑студия</title>
+    <!-- Фавикон (логотип) -->
+    <link rel="icon" type="image/png" href="logo_sprite.jpg">
+    <!-- Для устройств Apple (опционально) -->
+    <link rel="apple-touch-icon" href="logo_sprite.jpg">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* все стили остаются без изменений */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Левая боковая панель */
+        .sidebar {
+            width: 280px;
+            background: #111;
+            border-right: 1px solid #2a2a2a;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            background: #1a1a1a; /* запасной фон */
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff, #b49aff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Навигационные кнопки */
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            margin: 0.25rem 0;
+            width: 100%;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-btn:hover {
+            background: #1f1f1f;
+            color: #e0e0e0;
+            border-color: #333;
+        }
+
+        .nav-btn.active {
+            background: #1a1a1a;
+            color: #8b5cf6;
+            border-color: #8b5cf6;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .nav-btn .icon {
+            font-size: 1.5rem;
+            min-width: 2rem;
+        }
+
+        /* Основной контент */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+            background: #0a0a0a;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Общие стили */
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #b49aff 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #fff;
+            margin: 2rem 0 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: #8b5cf6;
+            border-radius: 2px;
+        }
+
+        /* Команда */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .team-member {
+            background: #1f1f1f;
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #333;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+            border-color: #8b5cf6;
+        }
+
+        .member-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #8b5cf6;
+            border: 2px solid #8b5cf6;
+        }
+
+        .member-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .member-role {
+            color: #b49aff;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .member-bio {
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+
+        /* Контакты */
+        .contacts {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #1f1f1f;
+            padding: 1rem 1.5rem;
+            border-radius: 40px;
+            border: 1px solid #333;
+            transition: border-color 0.2s;
+            text-decoration: none;
+            color: #e0e0e0;
+        }
+
+        .contact-item:hover {
+            border-color: #8b5cf6;
+        }
+
+        .contact-icon {
+            font-size: 1.5rem;
+            min-width: 2rem;
+            color: #8b5cf6;
+        }
+
+        /* Прогресс */
+        .progress-section {
+            margin: 2rem 0;
+        }
+
+        .progress-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+
+        .progress-bar-bg {
+            background: #2a2a2a;
+            height: 12px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+            height: 100%;
+            border-radius: 20px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        /* Галереи */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .gallery-item {
+            background: #1f1f1f;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            border: 1px solid #333;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.02);
+            border-color: #8b5cf6;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .backstage-item {
+            background: #1f1f1f;
+            border-radius: 16px;
+            padding: 0.75rem;
+            border: 1px solid #333;
+        }
+
+        .backstage-item img {
+            width: 100%;
+            border-radius: 12px;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+
+        .backstage-caption {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        .backstage-caption small {
+            color: #8b5cf6;
+            display: block;
+            margin-top: 0.2rem;
+        }
+
+        /* Мобильное меню */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 200;
+            background: #1f1f1f;
+            border: 1px solid #333;
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: #8b5cf6;
+            cursor: pointer;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+                position: fixed;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 4rem;
+            }
+            .menu-toggle {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Кнопка открытия меню на мобильных -->
+    <div class="menu-toggle" id="menuToggle">☰</div>
+
+    <!-- Левая панель -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="logo_sprite.jpg" alt="LuminTeam Logo">
+            </div>
+            <span class="team-name">LuminTeam</span>
+        </div>
+
+        <button class="nav-btn active" data-page="home">
+            <span class="icon">🏠</span> Главная
+        </button>
+        <button class="nav-btn" data-page="project">
+            <span class="icon">🎮</span> Проект
+        </button>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="main-content">
+        <!-- Страница Главная -->
+        <div id="homePage" class="page active">
+            <h1>LuminTeam</h1>
+            <p style="font-size: 1.2rem; color: #ccc; margin-bottom: 2rem;">
+                Инди‑студия, создающая игры с душой. Мы верим, что пиксели могут рассказать историю.
+            </p>
+
+            <h2>Команда</h2>
+            <div class="team-grid" id="teamContainer"></div>
+
+            <h2 style="margin-top: 3rem;">Связаться с нами</h2>
+            <div class="contacts">
+                <a href="mailto:lumincore1@gmail.com" class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <span>lumincore1@gmail.com</span>
+                </a>
+                <a href="https://t.me/lumin_core" target="_blank" class="contact-item">
+                    <span class="contact-icon">📱</span>
+                    <span>Telegram: @lumin_core</span>
+                </a>
+                <a href="https://luminteam.dev" target="_blank" class="contact-item">
+                    <span class="contact-icon">🌐</span>
+                    <span>luminteam.dev</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Страница Проект -->
+        <div id="projectPage" class="page">
+            <h1>«Песнь Сорокопута»</h1>
+            <p style="font-size: 1.2rem; color: #ccc; margin-bottom: 2rem;">
+                Гибрид визуальной новеллы и RPG. Исследуйте мир, принимайте решения, влияйте на сюжет.
+            </p>
+
+            <h2>Прогресс разработки</h2>
+            <div class="progress-section">
+                <div class="progress-item">
+                    <div class="progress-header"><span>Геймплей</span> <span>20%</span></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:20%"></div></div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-header"><span>Арт</span> <span>10%</span></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:10%"></div></div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-header"><span>Звук</span> <span>10%</span></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:10%"></div></div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-header"><span>Оптимизация</span> <span>30%</span></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:30%"></div></div>
+                </div>
+            </div>
+
+            <h2>🎨 Концепт‑арты</h2>
+            <div class="gallery-grid" id="conceptGallery"></div>
+
+            <h2 style="margin-top: 2rem;">🎬 Бэкстейдж</h2>
+            <div class="gallery-grid" id="backstageGallery"></div>
+
+            <p style="color: #666; margin-top: 1rem; font-size: 0.9rem;">
+                * Изображения взяты для примера. Замените ссылки на свои.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Данные команды
+        const team = [
+            { name: 'Алексей', role: 'Программист', bio: 'Архитектор кода, фанат чистых функций и тёмных тем.', avatar: '👨‍💻' },
+            { name: 'Мария', role: 'Художник', bio: 'Создаёт миры и персонажей. Вдохновляется мрачным фэнтези.', avatar: '🎨' },
+            { name: 'Илья', role: 'UI/UX дизайнер', bio: 'Отвечает за то, чтобы интерфейсы были удобными и красивыми.', avatar: '📱' },
+            { name: 'Дмитрий', role: 'Композитор', bio: 'Пишет музыку, которая остаётся в сердце.', avatar: '🎵' }
+        ];
+
+        // Концепт-арты (замените на свои ссылки)
+        const conceptArts = [
+            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+1', alt: 'Концепт 1' },
+            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+2', alt: 'Концепт 2' },
+            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+3', alt: 'Концепт 3' },
+            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+4', alt: 'Концепт 4' },
+        ];
+
+        // Бэкстейдж
+        const backstageItems = [
+            { src: 'https://via.placeholder.com/400x250/1f1f1f/8b5cf6?text=Sketch', caption: 'Набросок персонажа', date: '2026-01-15' },
+            { src: 'https://via.placeholder.com/400x250/1f1f1f/8b5cf6?text=Modeling', caption: '3D‑моделирование', date: '2026-02-01' },
+            { src: 'https://via.placeholder.com/400x250/1f1f1f/8b5cf6?text=Sound', caption: 'Запись голоса', date: '2026-02-10' },
+        ];
+
+        // Рендер
+        function renderTeam() {
+            document.getElementById('teamContainer').innerHTML = team.map(m => `
+                <div class="team-member">
+                    <div class="member-avatar">${m.avatar}</div>
+                    <div class="member-name">${m.name}</div>
+                    <div class="member-role">${m.role}</div>
+                    <div class="member-bio">${m.bio}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderConceptGallery() {
+            document.getElementById('conceptGallery').innerHTML = conceptArts.map(art => `
+                <div class="gallery-item" onclick="window.open('${art.src}', '_blank')">
+                    <img src="${art.src}" alt="${art.alt}" loading="lazy">
+                </div>
+            `).join('');
+        }
+
+        function renderBackstageGallery() {
+            document.getElementById('backstageGallery').innerHTML = backstageItems.map(item => `
+                <div class="backstage-item">
+                    <img src="${item.src}" alt="${item.caption}" loading="lazy">
+                    <div class="backstage-caption">
+                        ${item.caption}<br>
+                        <small>🗓 ${item.date}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Навигация
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.dataset.page === pageId.replace('Page', ''));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => showPage(btn.dataset.page + 'Page'));
+        });
+
+        // Мобильное меню
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // Закрытие меню при клике вне
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('menuToggle');
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !toggle.contains(e.target) && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // Инициализация
+        renderTeam();
+        renderConceptGallery();
+        renderBackstageGallery();
+
+        // Telegram WebApp
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.setHeaderColor('#0a0a0a');
+            tg.setBackgroundColor('#0a0a0a');
+        }
+
+        showPage('homePage');
+    </script>
+</body>
+</html>
