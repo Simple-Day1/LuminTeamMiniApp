@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LuminTeam — инди‑студия</title>
-    <!-- Фавикон (логотип) -->
-    <link rel="icon" type="image/png" href="logo_sprite.jpg">
-    <!-- Для устройств Apple (опционально) -->
-    <link rel="apple-touch-icon" href="logo_sprite.jpg">
+    <!-- Фавикон и иконка для Apple через raw.githubusercontent -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* все стили остаются без изменений */
+        /* Сброс и базовые стили */
         * {
             margin: 0;
             padding: 0;
@@ -57,7 +56,7 @@
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-            background: #1a1a1a; /* запасной фон */
+            background: #1a1a1a;
         }
 
         .logo img {
@@ -78,7 +77,6 @@
             background-clip: text;
         }
 
-        /* Навигационные кнопки */
         .nav-btn {
             background: none;
             border: none;
@@ -116,7 +114,6 @@
             min-width: 2rem;
         }
 
-        /* Основной контент */
         .main-content {
             flex: 1;
             margin-left: 280px;
@@ -139,7 +136,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Общие стили */
         h1 {
             font-size: 2.5rem;
             background: linear-gradient(135deg, #ffffff 0%, #b49aff 80%);
@@ -224,7 +220,6 @@
             font-size: 0.95rem;
         }
 
-        /* Контакты */
         .contacts {
             display: flex;
             flex-direction: column;
@@ -255,7 +250,6 @@
             color: #8b5cf6;
         }
 
-        /* Прогресс */
         .progress-section {
             margin: 2rem 0;
         }
@@ -286,7 +280,98 @@
             transition: width 1s ease;
         }
 
-        /* Галереи */
+        /* === КОНЦЕПТ-АРТ КАРУСЕЛЬ (кнопки вне изображения) === */
+        .concept-viewer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .concept-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .concept-image-container {
+            flex: 1;
+            max-width: 800px;
+            background: #1a1a1a;
+            border-radius: 24px;
+            border: 1px solid #333;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .concept-image-container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        .concept-image {
+            width: 100%;
+            height: auto;
+            max-height: 60vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Стили для кнопок навигации (отдельно) */
+        .nav-btn-concept {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 2px solid #8b5cf6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .nav-btn-concept:hover {
+            background: #8b5cf6;
+            border-color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #8b5cf6;
+        }
+
+        .nav-btn-concept.hidden {
+            display: none;
+        }
+
+        .concept-counter {
+            margin-top: 1rem;
+            color: #aaa;
+            font-size: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .concept-title {
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            color: #b49aff;
+        }
+
+        /* Бэкстейдж */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -360,7 +445,6 @@
             cursor: pointer;
         }
 
-        /* Адаптивность */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -381,18 +465,182 @@
             .menu-toggle {
                 display: flex;
             }
+            .concept-row {
+                gap: 10px;
+            }
+            .nav-btn-concept {
+                width: 44px;
+                height: 44px;
+                font-size: 2rem;
+            }
+        }
+
+        /* === МОДАЛЬНОЕ ОКНО с плавной анимацией === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            width: 95vw;
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .modal-image-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: calc(100% - 200px); /* место для кнопок */
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-nav {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 2px solid #8b5cf6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .modal-nav:hover {
+            background: #8b5cf6;
+            border-color: #fff;
+            transform: scale(1.1);
+        }
+
+        .modal-nav.hidden {
+            display: none;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            font-size: 4rem;
+            color: #fff;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0 10px;
+            line-height: 1;
+            transition: 0.2s;
+            z-index: 1010;
+        }
+
+        .modal-close:hover {
+            color: #8b5cf6;
+            transform: scale(1.2);
+        }
+
+        .modal-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ccc;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 768px) {
+            .modal-row {
+                gap: 10px;
+            }
+            .modal-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 2.2rem;
+            }
+            .modal-image-wrapper {
+                max-width: calc(100% - 100px);
+            }
+            .modal-close {
+                top: 15px;
+                right: 25px;
+                font-size: 3rem;
+            }
+            .modal-counter {
+                bottom: 15px;
+                font-size: 0.9rem;
+                padding: 5px 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Кнопка открытия меню на мобильных -->
     <div class="menu-toggle" id="menuToggle">☰</div>
 
     <!-- Левая панель -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-                <img src="logo_sprite.jpg" alt="LuminTeam Logo">
+                <img src="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg" alt="LuminTeam Logo">
             </div>
             <span class="team-name">LuminTeam</span>
         </div>
@@ -462,7 +710,20 @@
             </div>
 
             <h2>🎨 Концепт‑арты</h2>
-            <div class="gallery-grid" id="conceptGallery"></div>
+            <!-- Карусель с кнопками вне изображения -->
+            <div class="concept-viewer">
+                <div class="concept-row">
+                    <button class="nav-btn-concept" id="prevConcept">&larr;</button>
+                    <div class="concept-image-container" id="conceptImageContainer">
+                        <img id="conceptImage" class="concept-image" src="" alt="Концепт-арт">
+                    </div>
+                    <button class="nav-btn-concept" id="nextConcept">&rarr;</button>
+                </div>
+                <div class="concept-counter">
+                    <span id="conceptIndex"></span> из <span id="conceptTotal"></span>
+                </div>
+                <div class="concept-title" id="conceptTitle"></div>
+            </div>
 
             <h2 style="margin-top: 2rem;">🎬 Бэкстейдж</h2>
             <div class="gallery-grid" id="backstageGallery"></div>
@@ -473,31 +734,46 @@
         </div>
     </div>
 
+    <!-- Модальное окно с кнопками вне изображения -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-row">
+                <button class="modal-nav" id="modalPrev">&larr;</button>
+                <div class="modal-image-wrapper">
+                    <img class="modal-image" id="modalImage" src="" alt="Концепт-арт">
+                </div>
+                <button class="modal-nav" id="modalNext">&rarr;</button>
+            </div>
+            <div class="modal-counter" id="modalCounter"></div>
+        </div>
+    </div>
+
     <script>
         // Данные команды
         const team = [
-            { name: 'Алексей', role: 'Программист', bio: 'Архитектор кода, фанат чистых функций и тёмных тем.', avatar: '👨‍💻' },
-            { name: 'Мария', role: 'Художник', bio: 'Создаёт миры и персонажей. Вдохновляется мрачным фэнтези.', avatar: '🎨' },
-            { name: 'Илья', role: 'UI/UX дизайнер', bio: 'Отвечает за то, чтобы интерфейсы были удобными и красивыми.', avatar: '📱' },
-            { name: 'Дмитрий', role: 'Композитор', bio: 'Пишет музыку, которая остаётся в сердце.', avatar: '🎵' }
+            { name: 'Lumin Core', role: 'Программист', bio: 'Архитектор кода, фанат чистых функций и тёмных тем.', avatar: '👨‍💻' },
+            { name: 'KiberSkovorodka', role: 'Художник', bio: 'Создаёт миры и персонажей. Вдохновляется мрачным фэнтези.', avatar: '🎨' },
+            { name: 'Mr. Excelent', role: 'UI/UX дизайнер', bio: 'Отвечает за то, чтобы интерфейсы были удобными и красивыми.', avatar: '📱' },
+            { name: 'Mak1ma1', role: 'Композитор', bio: 'Пишет музыку, которая остаётся в сердце.', avatar: '🎵' }
         ];
 
-        // Концепт-арты (замените на свои ссылки)
+        // Концепт-арты (ссылки через raw.githubusercontent)
         const conceptArts = [
-            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+1', alt: 'Концепт 1' },
-            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+2', alt: 'Концепт 2' },
-            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+3', alt: 'Концепт 3' },
-            { src: 'https://via.placeholder.com/300x300/2a2a2a/8b5cf6?text=Art+4', alt: 'Концепт 4' },
+            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/main_menu.JPG', alt: 'Концепт 1 — Фон', title: 'Главное меню' },
+            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/character.jpg', alt: 'Концепт 2 — Персонаж', title: 'Главный герой' },
+            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/location.jpg', alt: 'Концепт 3 — Локация', title: 'Заброшенный храм' },
         ];
 
-        // Бэкстейдж
+        // Бэкстейдж (тоже через raw.githubusercontent)
         const backstageItems = [
-            { src: 'https://via.placeholder.com/400x250/1f1f1f/8b5cf6?text=Sketch', caption: 'Набросок персонажа', date: '2026-01-15' },
-            { src: 'https://via.placeholder.com/400x250/1f1f1f/8b5cf6?text=Modeling', caption: '3D‑моделирование', date: '2026-02-01' },
-            { src: 'https://via.placeholder.com/400x250/1f1f1f/8b5cf6?text=Sound', caption: 'Запись голоса', date: '2026-02-10' },
+            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/backstage/bts1.jpg', caption: 'Набросок персонажа', date: '2026-01-15' },
+            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/backstage/bts2.jpg', caption: '3D‑моделирование', date: '2026-02-01' },
+            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/backstage/bts3.jpg', caption: 'Запись голоса', date: '2026-02-10' },
         ];
 
-        // Рендер
+        let currentConceptIndex = 0;
+
         function renderTeam() {
             document.getElementById('teamContainer').innerHTML = team.map(m => `
                 <div class="team-member">
@@ -509,12 +785,40 @@
             `).join('');
         }
 
-        function renderConceptGallery() {
-            document.getElementById('conceptGallery').innerHTML = conceptArts.map(art => `
-                <div class="gallery-item" onclick="window.open('${art.src}', '_blank')">
-                    <img src="${art.src}" alt="${art.alt}" loading="lazy">
-                </div>
-            `).join('');
+        function updateConceptDisplay() {
+            const concept = conceptArts[currentConceptIndex];
+            document.getElementById('conceptImage').src = concept.src;
+            document.getElementById('conceptImage').alt = concept.alt;
+            document.getElementById('conceptTitle').textContent = concept.title || '';
+            document.getElementById('conceptIndex').textContent = currentConceptIndex + 1;
+            document.getElementById('conceptTotal').textContent = conceptArts.length;
+
+            const prevBtn = document.getElementById('prevConcept');
+            const nextBtn = document.getElementById('nextConcept');
+            if (currentConceptIndex === 0) {
+                prevBtn.classList.add('hidden');
+            } else {
+                prevBtn.classList.remove('hidden');
+            }
+            if (currentConceptIndex === conceptArts.length - 1) {
+                nextBtn.classList.add('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function nextConcept() {
+            if (currentConceptIndex < conceptArts.length - 1) {
+                currentConceptIndex++;
+                updateConceptDisplay();
+            }
+        }
+
+        function prevConcept() {
+            if (currentConceptIndex > 0) {
+                currentConceptIndex--;
+                updateConceptDisplay();
+            }
         }
 
         function renderBackstageGallery() {
@@ -529,7 +833,6 @@
             `).join('');
         }
 
-        // Навигация
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -547,12 +850,10 @@
             btn.addEventListener('click', () => showPage(btn.dataset.page + 'Page'));
         });
 
-        // Мобильное меню
         document.getElementById('menuToggle').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('open');
         });
 
-        // Закрытие меню при клике вне
         document.addEventListener('click', (e) => {
             const sidebar = document.getElementById('sidebar');
             const toggle = document.getElementById('menuToggle');
@@ -561,12 +862,72 @@
             }
         });
 
+        // Модальное окно
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalImage = document.getElementById('modalImage');
+        const modalCounter = document.getElementById('modalCounter');
+        const modalClose = document.getElementById('modalClose');
+        const modalPrev = document.getElementById('modalPrev');
+        const modalNext = document.getElementById('modalNext');
+
+        function openModal() {
+            updateModalImage();
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        function updateModalImage() {
+            const concept = conceptArts[currentConceptIndex];
+            modalImage.src = concept.src;
+            modalCounter.textContent = `${currentConceptIndex + 1} из ${conceptArts.length}`;
+            if (currentConceptIndex === 0) {
+                modalPrev.classList.add('hidden');
+            } else {
+                modalPrev.classList.remove('hidden');
+            }
+            if (currentConceptIndex === conceptArts.length - 1) {
+                modalNext.classList.add('hidden');
+            } else {
+                modalNext.classList.remove('hidden');
+            }
+        }
+
+        modalPrev.addEventListener('click', () => {
+            if (currentConceptIndex > 0) {
+                currentConceptIndex--;
+                updateConceptDisplay();
+                updateModalImage();
+            }
+        });
+
+        modalNext.addEventListener('click', () => {
+            if (currentConceptIndex < conceptArts.length - 1) {
+                currentConceptIndex++;
+                updateConceptDisplay();
+                updateModalImage();
+            }
+        });
+
+        document.getElementById('conceptImageContainer').addEventListener('click', (e) => {
+            openModal();
+        });
+
+        modalClose.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        document.getElementById('prevConcept').addEventListener('click', prevConcept);
+        document.getElementById('nextConcept').addEventListener('click', nextConcept);
+
         // Инициализация
         renderTeam();
-        renderConceptGallery();
         renderBackstageGallery();
+        updateConceptDisplay();
 
-        // Telegram WebApp
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.expand();
