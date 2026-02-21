@@ -4,31 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LuminTeam</title>
-    <!-- Фавикон и иконка для Apple через raw.githubusercontent -->
+
+    <!-- Шрифт Inter и Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- Фавикон и Apple Touch Icon -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg">
+
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
-        /* Сброс и базовые стили */
+        /* ===== СБРОС И CSS-ПЕРЕМЕННЫЕ (только тёмная тема) ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        :root {
+            --bg-color: #0a0a0a;
+            --surface-color: rgba(18, 18, 18, 0.8);
+            --surface-hover: rgba(30, 30, 40, 0.9);
+            --text-primary: #e0e0e0;
+            --text-secondary: #aaa;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --border-color: rgba(139, 92, 246, 0.15);
+            --border-hover: rgba(139, 92, 246, 0.5);
+            --card-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+            --transition: all 0.25s ease;
         }
 
         body {
-            background: #0a0a0a;
-            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
+            line-height: 1.5;
+            font-size: 16px;
         }
 
-        /* Левая боковая панель */
+        /* ===== ТИПОГРАФИКА ===== */
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 2.5rem 0 1.5rem;
+            position: relative;
+            display: inline-block;
+            letter-spacing: -0.01em;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* ===== ЛЕВАЯ ПАНЕЛЬ (САЙДБАР) ===== */
         .sidebar {
             width: 280px;
-            background: #111;
-            border-right: 1px solid #2a2a2a;
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             padding: 2rem 1rem;
@@ -37,17 +98,18 @@
             left: 0;
             bottom: 0;
             overflow-y: auto;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, background 0.2s;
             z-index: 100;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .logo {
@@ -55,7 +117,7 @@
             height: 48px;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 4px 12px var(--accent-glow);
             background: #1a1a1a;
         }
 
@@ -69,9 +131,7 @@
         .team-name {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #fff;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #ffffff, #b49aff);
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -80,7 +140,7 @@
         .nav-btn {
             background: none;
             border: none;
-            color: #a0a0a0;
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 1rem;
@@ -92,21 +152,23 @@
             font-weight: 500;
             border-radius: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: var(--transition);
             border: 1px solid transparent;
+            backdrop-filter: blur(4px);
         }
 
         .nav-btn:hover {
-            background: #1f1f1f;
-            color: #e0e0e0;
-            border-color: #333;
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            transform: translateX(4px);
         }
 
         .nav-btn.active {
-            background: #1a1a1a;
-            color: #8b5cf6;
-            border-color: #8b5cf6;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+            background: var(--surface-color);
+            color: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
 
         .nav-btn .icon {
@@ -114,17 +176,21 @@
             min-width: 2rem;
         }
 
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
         .main-content {
             flex: 1;
             margin-left: 280px;
             padding: 2rem;
             min-height: 100vh;
-            background: #0a0a0a;
+            background: var(--bg-color);
+            max-width: 1200px;
+            margin-right: auto;
+            transition: margin-left 0.3s;
         }
 
         .page {
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.4s ease;
         }
 
         .page.active {
@@ -136,35 +202,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #ffffff 0%, #b49aff 80%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-        }
-
-        h2 {
-            font-size: 2rem;
-            color: #fff;
-            margin: 2rem 0 1rem;
-            position: relative;
-            display: inline-block;
-        }
-
-        h2::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: #8b5cf6;
-            border-radius: 2px;
-        }
-
-        /* Команда */
+        /* ===== КАРТОЧКИ КОМАНДЫ ===== */
         .team-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -173,53 +211,66 @@
         }
 
         .team-member {
-            background: #1f1f1f;
-            border-radius: 24px;
-            padding: 1.5rem;
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 2rem 1.5rem;
             text-align: center;
-            border: 1px solid #333;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: var(--transition);
+            box-shadow: var(--card-shadow);
         }
 
         .team-member:hover {
-            transform: translateY(-5px);
-            border-color: #8b5cf6;
+            transform: translateY(-6px);
+            border-color: var(--border-hover);
+            box-shadow: 0 25px 35px -12px var(--accent-glow);
         }
 
         .member-avatar {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #1e1e2f, #13131f);
             border-radius: 50%;
             margin: 0 auto 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            color: #8b5cf6;
-            border: 2px solid #8b5cf6;
+            font-size: 2.5rem;
+            color: var(--accent);
+            border: 2px solid var(--border-hover);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+        }
+
+        .team-member:hover .member-avatar {
+            transform: scale(1.05);
+            border-color: var(--accent);
         }
 
         .member-name {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #fff;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
         }
 
         .member-role {
-            color: #b49aff;
-            font-size: 0.95rem;
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             margin-bottom: 1rem;
         }
 
         .member-bio {
-            color: #aaa;
+            color: var(--text-secondary);
             font-size: 0.95rem;
+            line-height: 1.6;
         }
 
+        /* ===== КОНТАКТЫ ===== */
         .contacts {
             display: flex;
             flex-direction: column;
@@ -231,25 +282,30 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            background: #1f1f1f;
+            background: var(--surface-color);
+            backdrop-filter: blur(8px);
             padding: 1rem 1.5rem;
             border-radius: 40px;
-            border: 1px solid #333;
-            transition: border-color 0.2s;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
             text-decoration: none;
-            color: #e0e0e0;
+            color: var(--text-primary);
         }
 
         .contact-item:hover {
-            border-color: #8b5cf6;
+            border-color: var(--border-hover);
+            background: var(--surface-hover);
+            transform: translateX(6px);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
 
         .contact-icon {
             font-size: 1.5rem;
             min-width: 2rem;
-            color: #8b5cf6;
+            color: var(--accent);
         }
 
+        /* ===== ПРОГРЕСС-БАРЫ ===== */
         .progress-section {
             margin: 2rem 0;
         }
@@ -262,25 +318,27 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.5rem;
-            color: #ccc;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .progress-bar-bg {
-            background: #2a2a2a;
-            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 16px;
             border-radius: 20px;
             overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .progress-bar-fill {
-            background: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+            background: linear-gradient(90deg, var(--accent), #c084fc, #e9d5ff);
             height: 100%;
             border-radius: 20px;
             width: 0%;
-            transition: width 1s ease;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* === КОНЦЕПТ-АРТ КАРУСЕЛЬ (кнопки вне изображения) === */
+        /* ===== КАРУСЕЛЬ КОНЦЕПТ-АРТОВ ===== */
         .concept-viewer {
             display: flex;
             flex-direction: column;
@@ -301,18 +359,19 @@
         .concept-image-container {
             flex: 1;
             max-width: 800px;
-            background: #1a1a1a;
+            background: var(--surface-color);
             border-radius: 24px;
-            border: 1px solid #333;
+            border: 1px solid var(--border-color);
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(4px);
         }
 
         .concept-image-container:hover {
             transform: scale(1.02);
-            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 15px 40px var(--accent-glow);
         }
 
         .concept-image {
@@ -323,34 +382,34 @@
             display: block;
         }
 
-        /* Стили для кнопок навигации (отдельно) */
         .nav-btn-concept {
             width: 60px;
             height: 60px;
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-            border: 2px solid #8b5cf6;
+            background: var(--surface-color);
+            border: 2px solid var(--accent);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 2.5rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            transition: var(--transition);
+            box-shadow: 0 4px 15px var(--accent-glow);
             padding: 0;
             margin: 0;
             line-height: 1;
             font-family: 'Arial', 'Helvetica', sans-serif;
             flex-shrink: 0;
+            backdrop-filter: blur(4px);
         }
 
         .nav-btn-concept:hover {
-            background: #8b5cf6;
-            border-color: #fff;
+            background: var(--accent);
+            border-color: var(--text-primary);
             transform: scale(1.1);
-            box-shadow: 0 0 20px #8b5cf6;
+            box-shadow: 0 0 20px var(--accent);
         }
 
         .nav-btn-concept.hidden {
@@ -359,7 +418,7 @@
 
         .concept-counter {
             margin-top: 1rem;
-            color: #aaa;
+            color: var(--text-secondary);
             font-size: 1rem;
             display: flex;
             gap: 1rem;
@@ -368,10 +427,10 @@
         .concept-title {
             margin-top: 0.5rem;
             font-size: 1.1rem;
-            color: #b49aff;
+            color: var(--accent);
         }
 
-        /* Бэкстейдж */
+        /* ===== БЭКСТЕЙДЖ ===== */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -379,37 +438,24 @@
             margin: 1.5rem 0;
         }
 
-        .gallery-item {
-            background: #1f1f1f;
-            border-radius: 16px;
-            overflow: hidden;
-            aspect-ratio: 1 / 1;
-            border: 1px solid #333;
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.02);
-            border-color: #8b5cf6;
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
         .backstage-item {
-            background: #1f1f1f;
-            border-radius: 16px;
+            background: var(--surface-color);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
             padding: 0.75rem;
-            border: 1px solid #333;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .backstage-item:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 25px -8px var(--accent-glow);
         }
 
         .backstage-item img {
             width: 100%;
-            border-radius: 12px;
+            border-radius: 14px;
             aspect-ratio: 16/9;
             object-fit: cover;
         }
@@ -417,65 +463,17 @@
         .backstage-caption {
             margin-top: 0.5rem;
             font-size: 0.9rem;
-            color: #bbb;
+            color: var(--text-secondary);
         }
 
         .backstage-caption small {
-            color: #8b5cf6;
+            color: var(--accent);
             display: block;
             margin-top: 0.2rem;
+            font-weight: 500;
         }
 
-        /* Мобильное меню */
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 200;
-            background: #1f1f1f;
-            border: 1px solid #333;
-            border-radius: 12px;
-            width: 48px;
-            height: 48px;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: #8b5cf6;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            .sidebar {
-                transform: translateX(-100%);
-                width: 260px;
-                position: fixed;
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-                padding-top: 4rem;
-            }
-            .menu-toggle {
-                display: flex;
-            }
-            .concept-row {
-                gap: 10px;
-            }
-            .nav-btn-concept {
-                width: 44px;
-                height: 44px;
-                font-size: 2rem;
-            }
-        }
-
-        /* === МОДАЛЬНОЕ ОКНО с плавной анимацией === */
+        /* ===== МОДАЛЬНОЕ ОКНО ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -526,7 +524,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            max-width: calc(100% - 200px); /* место для кнопок */
+            max-width: calc(100% - 200px);
         }
 
         .modal-image {
@@ -534,7 +532,7 @@
             max-height: 85vh;
             object-fit: contain;
             border-radius: 8px;
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 30px var(--accent-glow);
             animation: popIn 0.4s ease;
         }
 
@@ -546,29 +544,31 @@
         .modal-nav {
             width: 70px;
             height: 70px;
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-            border: 2px solid #8b5cf6;
+            background: var(--surface-color);
+            border: 2px solid var(--accent);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 3rem;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
+            transition: var(--transition);
+            box-shadow: 0 4px 20px var(--accent-glow);
             padding: 0;
             margin: 0;
             line-height: 1;
             font-family: 'Arial', 'Helvetica', sans-serif;
             flex-shrink: 0;
+            backdrop-filter: blur(4px);
         }
 
         .modal-nav:hover {
-            background: #8b5cf6;
-            border-color: #fff;
+            background: var(--accent);
+            border-color: var(--text-primary);
             transform: scale(1.1);
+            box-shadow: 0 0 20px var(--accent);
         }
 
         .modal-nav.hidden {
@@ -580,7 +580,7 @@
             top: 30px;
             right: 50px;
             font-size: 4rem;
-            color: #fff;
+            color: var(--text-primary);
             cursor: pointer;
             background: none;
             border: none;
@@ -591,7 +591,7 @@
         }
 
         .modal-close:hover {
-            color: #8b5cf6;
+            color: var(--accent);
             transform: scale(1.2);
         }
 
@@ -600,7 +600,7 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            color: #ccc;
+            color: var(--text-secondary);
             background: rgba(0,0,0,0.6);
             padding: 8px 20px;
             border-radius: 30px;
@@ -608,7 +608,69 @@
             backdrop-filter: blur(5px);
         }
 
+        /* ===== МОБИЛЬНОЕ МЕНЮ ===== */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 200;
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            border-color: var(--border-hover);
+            transform: scale(1.05);
+        }
+
+        /* ===== АДАПТИВНОСТЬ ===== */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+
         @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+                position: fixed;
+                box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 4rem;
+            }
+            .menu-toggle {
+                display: flex;
+            }
+            .concept-row {
+                gap: 10px;
+            }
+            .nav-btn-concept {
+                width: 44px;
+                height: 44px;
+                font-size: 2rem;
+            }
             .modal-row {
                 gap: 10px;
             }
@@ -631,6 +693,29 @@
                 padding: 5px 15px;
             }
         }
+
+        /* ===== МИКРОАНИМАЦИИ ПОЯВЛЕНИЯ ===== */
+        .page.active .team-member,
+        .page.active .contact-item,
+        .page.active .progress-item,
+        .page.active .gallery-item,
+        .page.active .backstage-item {
+            animation: slideUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .team-member:nth-child(1) { animation-delay: 0.1s; }
+        .team-member:nth-child(2) { animation-delay: 0.2s; }
+        .team-member:nth-child(3) { animation-delay: 0.3s; }
+        .team-member:nth-child(4) { animation-delay: 0.4s; }
+        .contact-item:nth-child(1) { animation-delay: 0.15s; }
+        .contact-item:nth-child(2) { animation-delay: 0.25s; }
+        .contact-item:nth-child(3) { animation-delay: 0.35s; }
     </style>
 </head>
 <body>
@@ -640,7 +725,10 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-                <img src="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg" alt="LuminTeam Logo">
+                <picture>
+                    <source srcset="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg" type="image/png">
+                    <img src="https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/logo_sprite.jpg" alt="LuminTeam Logo">
+                </picture>
             </div>
             <span class="team-name">LuminTeam</span>
         </div>
@@ -658,7 +746,7 @@
         <!-- Страница Главная -->
         <div id="homePage" class="page active">
             <h1>LuminTeam</h1>
-            <p style="font-size: 1.2rem; color: #ccc; margin-bottom: 2rem;">
+            <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">
                 Создаём игры для тех, кто ищет большего. Вместо привычных механик — свежий опыт, вместо клише — эмоции. LuminTeam.
             </p>
 
@@ -668,15 +756,15 @@
             <h2 style="margin-top: 3rem;">Связаться с нами</h2>
             <div class="contacts">
                 <a href="mailto:lumincore1@gmail.com" class="contact-item">
-                    <span class="contact-icon">📧</span>
+                    <span class="contact-icon"><i class="fas fa-envelope"></i></span>
                     <span>lumincore1@gmail.com</span>
                 </a>
                 <a href="https://t.me/lumin_core" target="_blank" class="contact-item">
-                    <span class="contact-icon">📱</span>
+                    <span class="contact-icon"><i class="fab fa-telegram"></i></span>
                     <span>Telegram: @lumin_core</span>
                 </a>
                 <a href="https://luminteam.dev" target="_blank" class="contact-item">
-                    <span class="contact-icon">🌐</span>
+                    <span class="contact-icon"><i class="fas fa-globe"></i></span>
                     <span>luminteam.dev</span>
                 </a>
             </div>
@@ -685,7 +773,7 @@
         <!-- Страница Проект -->
         <div id="projectPage" class="page">
             <h1>«Песнь Сорокопута»</h1>
-            <p style="font-size: 1.2rem; color: #ccc; margin-bottom: 2rem;">
+            <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">
                 Гибрид визуальной новеллы, исследования мира и динамических событий. Влияйте на сюжет, проходите QTE и мини-игры.
             </p>
 
@@ -693,24 +781,31 @@
             <div class="progress-section">
                 <div class="progress-item">
                     <div class="progress-header"><span>Геймплей</span> <span>20%</span></div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:20%"></div></div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" data-percent="20"></div>
+                    </div>
                 </div>
                 <div class="progress-item">
                     <div class="progress-header"><span>Арт</span> <span>10%</span></div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:10%"></div></div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" data-percent="10"></div>
+                    </div>
                 </div>
                 <div class="progress-item">
                     <div class="progress-header"><span>Звук</span> <span>10%</span></div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:10%"></div></div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" data-percent="10"></div>
+                    </div>
                 </div>
                 <div class="progress-item">
                     <div class="progress-header"><span>Оптимизация</span> <span>30%</span></div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:30%"></div></div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" data-percent="30"></div>
+                    </div>
                 </div>
             </div>
 
             <h2>🎨 Концепт‑арты</h2>
-            <!-- Карусель с кнопками вне изображения -->
             <div class="concept-viewer">
                 <div class="concept-row">
                     <button class="nav-btn-concept" id="prevConcept">&larr;</button>
@@ -727,14 +822,10 @@
 
             <h2 style="margin-top: 2rem;">🎬 Бэкстейдж</h2>
             <div class="gallery-grid" id="backstageGallery"></div>
-
-            <p style="color: #666; margin-top: 1rem; font-size: 0.9rem;">
-                
-            </p>
         </div>
     </div>
 
-    <!-- Модальное окно с кнопками вне изображения -->
+    <!-- Модальное окно -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-content">
             <button class="modal-close" id="modalClose">&times;</button>
@@ -758,17 +849,16 @@
             { name: 'Mak1ma1', role: 'Композитор', bio: 'Пишет музыку, которая остаётся в сердце.', avatar: '🎵' }
         ];
 
-        // Концепт-арты (ссылки через raw.githubusercontent)
+        // Концепт-арты
         const conceptArts = [
             { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/main_menu.JPG', alt: 'Концепт 1 — Фон', title: 'Главное меню' },
-            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/main_menu.JPG', alt: 'Концепт 1 — Фон', title: 'Главное меню' },
+            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/main_menu.JPG', alt: 'Концепт 2 — Фон', title: 'Главное меню' }
         ];
 
-        // Бэкстейдж (тоже через raw.githubusercontent)
-        const backstageItems = [
-        ];
+        const backstageItems = []; // можно добавить позже
 
         let currentConceptIndex = 0;
+        let progressAnimated = false; // флаг для анимации прогресс-баров
 
         function renderTeam() {
             document.getElementById('teamContainer').innerHTML = team.map(m => `
@@ -829,6 +919,20 @@
             `).join('');
         }
 
+        // Анимация прогресс-баров (заполнение от 0 до заданного процента)
+        function animateProgressBars() {
+            const bars = document.querySelectorAll('.progress-bar-fill');
+            bars.forEach(bar => {
+                const targetPercent = bar.getAttribute('data-percent') || '0';
+                // Сбрасываем ширину
+                bar.style.width = '0%';
+                // Форсируем перерисовку
+                void bar.offsetWidth;
+                // Устанавливаем целевую ширину (сработает transition)
+                bar.style.width = targetPercent + '%';
+            });
+        }
+
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -836,6 +940,15 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.dataset.page === pageId.replace('Page', ''));
             if (activeBtn) activeBtn.classList.add('active');
+
+            // Если открывается страница проекта и анимация ещё не была выполнена
+            if (pageId === 'projectPage' && !progressAnimated) {
+                // Небольшая задержка, чтобы страница успела отрисоваться
+                setTimeout(() => {
+                    animateProgressBars();
+                    progressAnimated = true;
+                }, 50);
+            }
 
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('open');
@@ -924,13 +1037,17 @@
         renderBackstageGallery();
         updateConceptDisplay();
 
+        // Telegram WebApp
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.expand();
-            tg.setHeaderColor('#0a0a0a');
-            tg.setBackgroundColor('#0a0a0a');
+            tg.MainButton.setText('Закрыть');
+            tg.MainButton.onClick(() => tg.close());
+            tg.MainButton.show();
+            tg.BackButton.onClick(() => tg.BackButton.hide());
         }
 
+        // Показываем главную страницу
         showPage('homePage');
     </script>
 </body>
