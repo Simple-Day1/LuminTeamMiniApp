@@ -841,7 +841,7 @@
     </div>
 
     <script>
-        // Данные команды
+        // Данные команды (статичны)
         const team = [
             { name: 'Lumin Core', role: 'Team Lead', bio: 'Проектирует архитектуру ПО и координирует разработку.', avatar: '👨‍💻' },
             { name: 'KiberSkovorodka', role: 'Художник-Иллюстратор', bio: 'Создаёт миры и персонажей.', avatar: '🎨' },
@@ -849,17 +849,74 @@
             { name: 'Mak1ma1', role: 'Композитор', bio: 'Пишет музыку, которая остаётся в сердце.', avatar: '🎵' }
         ];
 
-        // Концепт-арты
-        const conceptArts = [
-            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/main_menu.JPG', alt: 'Концепт 1 — Фон', title: 'Главное меню' },
-            { src: 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/assets/images/gallery/main_menu.JPG', alt: 'Концепт 2 — Фон', title: 'Главное меню' }
-        ];
-
-        const backstageItems = []; // можно добавить позже
+        // Переменные для динамически загружаемых данных
+        let conceptArts = [];
+        let backstageItems = [];
 
         let currentConceptIndex = 0;
         let progressAnimated = false; // флаг для анимации прогресс-баров
 
+        // Функция загрузки изображений из папки репозитория через GitHub API
+        async function loadImagesFromRepo(folderPath) {
+            const apiUrl = `https://api.github.com/repos/Simple-Day1/LuminTeamMiniApp/contents/${folderPath}`;
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    console.warn(`Не удалось загрузить ${folderPath}:`, response.status);
+                    return [];
+                }
+                const data = await response.json();
+                // Фильтруем только файлы с изображениями
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
+                return data
+                    .filter(item => item.type === 'file' && imageExtensions.some(ext => item.name.toLowerCase().endsWith(ext)))
+                    .map(item => ({
+                        src: item.download_url,
+                        alt: item.name,
+                        title: item.name.split('.').slice(0, -1).join('.') // имя без расширения
+                    }));
+            } catch (error) {
+                console.error('Ошибка при загрузке из репозитория:', error);
+                return [];
+            }
+        }
+
+        // Загрузка всех данных (с кэшированием в sessionStorage)
+        async function loadAllContent() {
+            // Концепт-арты
+            const cachedConcept = sessionStorage.getItem('conceptArts');
+            if (cachedConcept) {
+                conceptArts = JSON.parse(cachedConcept);
+                updateConceptDisplay();
+            } else {
+                const concept = await loadImagesFromRepo('assets/images/gallery');
+                if (concept.length > 0) {
+                    conceptArts = concept;
+                    sessionStorage.setItem('conceptArts', JSON.stringify(concept));
+                } else {
+                    conceptArts = []; // пусто
+                }
+                updateConceptDisplay();
+            }
+
+            // Бэкстейдж
+            const cachedBackstage = sessionStorage.getItem('backstageItems');
+            if (cachedBackstage) {
+                backstageItems = JSON.parse(cachedBackstage);
+                renderBackstageGallery();
+            } else {
+                const backstage = await loadImagesFromRepo('assets/images/backstage');
+                if (backstage.length > 0) {
+                    backstageItems = backstage;
+                    sessionStorage.setItem('backstageItems', JSON.stringify(backstage));
+                } else {
+                    backstageItems = [];
+                }
+                renderBackstageGallery();
+            }
+        }
+
+        // Рендер команды
         function renderTeam() {
             document.getElementById('teamContainer').innerHTML = team.map(m => `
                 <div class="team-member">
@@ -871,16 +928,40 @@
             `).join('');
         }
 
+        // Обновление отображения карусели концепт-артов
         function updateConceptDisplay() {
-            const concept = conceptArts[currentConceptIndex];
-            document.getElementById('conceptImage').src = concept.src;
-            document.getElementById('conceptImage').alt = concept.alt;
-            document.getElementById('conceptTitle').textContent = concept.title || '';
-            document.getElementById('conceptIndex').textContent = currentConceptIndex + 1;
-            document.getElementById('conceptTotal').textContent = conceptArts.length;
-
             const prevBtn = document.getElementById('prevConcept');
             const nextBtn = document.getElementById('nextConcept');
+            const conceptImage = document.getElementById('conceptImage');
+            const conceptTitle = document.getElementById('conceptTitle');
+            const conceptIndexSpan = document.getElementById('conceptIndex');
+            const conceptTotalSpan = document.getElementById('conceptTotal');
+
+            if (conceptArts.length === 0) {
+                conceptImage.src = '';
+                conceptTitle.textContent = 'Нет изображений';
+                conceptIndexSpan.textContent = '0';
+                conceptTotalSpan.textContent = '0';
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                return;
+            }
+
+            // Сбросим currentConceptIndex, если он вышел за пределы
+            if (currentConceptIndex >= conceptArts.length) {
+                currentConceptIndex = conceptArts.length - 1;
+            }
+            if (currentConceptIndex < 0) {
+                currentConceptIndex = 0;
+            }
+
+            const concept = conceptArts[currentConceptIndex];
+            conceptImage.src = concept.src;
+            conceptImage.alt = concept.alt;
+            conceptTitle.textContent = concept.title || '';
+            conceptIndexSpan.textContent = currentConceptIndex + 1;
+            conceptTotalSpan.textContent = conceptArts.length;
+
             if (currentConceptIndex === 0) {
                 prevBtn.classList.add('hidden');
             } else {
@@ -893,6 +974,7 @@
             }
         }
 
+        // Навигация по карусели
         function nextConcept() {
             if (currentConceptIndex < conceptArts.length - 1) {
                 currentConceptIndex++;
@@ -907,13 +989,20 @@
             }
         }
 
+        // Рендер галереи бэкстейджа
         function renderBackstageGallery() {
-            document.getElementById('backstageGallery').innerHTML = backstageItems.map(item => `
+            const gallery = document.getElementById('backstageGallery');
+            if (backstageItems.length === 0) {
+                gallery.innerHTML = '<p style="color: var(--text-secondary);">Пока нет материалов</p>';
+                return;
+            }
+
+            gallery.innerHTML = backstageItems.map(item => `
                 <div class="backstage-item">
-                    <img src="${item.src}" alt="${item.caption}" loading="lazy">
+                    <img src="${item.src}" alt="${item.alt}" loading="lazy">
                     <div class="backstage-caption">
-                        ${item.caption}<br>
-                        <small>🗓 ${item.date}</small>
+                        ${item.title}<br>
+                        <small>📸 Загружено</small>
                     </div>
                 </div>
             `).join('');
@@ -924,15 +1013,13 @@
             const bars = document.querySelectorAll('.progress-bar-fill');
             bars.forEach(bar => {
                 const targetPercent = bar.getAttribute('data-percent') || '0';
-                // Сбрасываем ширину
                 bar.style.width = '0%';
-                // Форсируем перерисовку
-                void bar.offsetWidth;
-                // Устанавливаем целевую ширину (сработает transition)
+                void bar.offsetWidth; // форсируем перерисовку
                 bar.style.width = targetPercent + '%';
             });
         }
 
+        // Переключение страниц
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -943,7 +1030,6 @@
 
             // Если открывается страница проекта и анимация ещё не была выполнена
             if (pageId === 'projectPage' && !progressAnimated) {
-                // Небольшая задержка, чтобы страница успела отрисоваться
                 setTimeout(() => {
                     animateProgressBars();
                     progressAnimated = true;
@@ -955,6 +1041,7 @@
             }
         }
 
+        // Инициализация обработчиков событий
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => showPage(btn.dataset.page + 'Page'));
         });
@@ -971,7 +1058,7 @@
             }
         });
 
-        // Модальное окно
+        // Модальное окно для карусели
         const modalOverlay = document.getElementById('modalOverlay');
         const modalImage = document.getElementById('modalImage');
         const modalCounter = document.getElementById('modalCounter');
@@ -980,6 +1067,7 @@
         const modalNext = document.getElementById('modalNext');
 
         function openModal() {
+            if (conceptArts.length === 0) return; // не открывать, если нет изображений
             updateModalImage();
             modalOverlay.classList.add('active');
         }
@@ -989,9 +1077,11 @@
         }
 
         function updateModalImage() {
+            if (conceptArts.length === 0) return;
             const concept = conceptArts[currentConceptIndex];
             modalImage.src = concept.src;
             modalCounter.textContent = `${currentConceptIndex + 1} из ${conceptArts.length}`;
+
             if (currentConceptIndex === 0) {
                 modalPrev.classList.add('hidden');
             } else {
@@ -1032,11 +1122,6 @@
         document.getElementById('prevConcept').addEventListener('click', prevConcept);
         document.getElementById('nextConcept').addEventListener('click', nextConcept);
 
-        // Инициализация
-        renderTeam();
-        renderBackstageGallery();
-        updateConceptDisplay();
-
         // Telegram WebApp
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -1047,7 +1132,9 @@
             tg.BackButton.onClick(() => tg.BackButton.hide());
         }
 
-        // Показываем главную страницу
+        // Запуск
+        renderTeam();
+        loadAllContent(); // асинхронно загрузит и обновит галереи
         showPage('homePage');
     </script>
 </body>
