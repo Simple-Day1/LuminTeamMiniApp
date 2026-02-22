@@ -867,7 +867,7 @@
                 }
                 const data = await response.json();
                 // Фильтруем только файлы с изображениями
-                const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.JPG', '.JPEG'];
                 return data
                     .filter(item => item.type === 'file' && imageExtensions.some(ext => item.name.toLowerCase().endsWith(ext)))
                     .map(item => ({
