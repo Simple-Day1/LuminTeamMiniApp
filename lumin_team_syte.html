@@ -778,29 +778,29 @@
             </p>
 
             <h2>Прогресс разработки первого эпизода</h2>
-            <div class="progress-section">
+            <div class="progress-section" id="progressSection">
                 <div class="progress-item">
-                    <div class="progress-header"><span>Геймплей</span> <span>40%</span></div>
+                    <div class="progress-header"><span>Геймплей</span> <span class="progress-value" data-key="gameplay">0%</span></div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" data-percent="40"></div>
+                        <div class="progress-bar-fill" data-key="gameplay" data-percent="0"></div>
                     </div>
                 </div>
                 <div class="progress-item">
-                    <div class="progress-header"><span>Арт</span> <span>4%</span></div>
+                    <div class="progress-header"><span>Арт</span> <span class="progress-value" data-key="art">0%</span></div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" data-percent="4"></div>
+                        <div class="progress-bar-fill" data-key="art" data-percent="0"></div>
                     </div>
                 </div>
                 <div class="progress-item">
-                    <div class="progress-header"><span>Звук</span> <span>10%</span></div>
+                    <div class="progress-header"><span>Звук</span> <span class="progress-value" data-key="sound">0%</span></div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" data-percent="10"></div>
+                        <div class="progress-bar-fill" data-key="sound" data-percent="0"></div>
                     </div>
                 </div>
                 <div class="progress-item">
-                    <div class="progress-header"><span>Оптимизация</span> <span>0%</span></div>
+                    <div class="progress-header"><span>Оптимизация</span> <span class="progress-value" data-key="optimization">0%</span></div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" data-percent="0"></div>
+                        <div class="progress-bar-fill" data-key="optimization" data-percent="0"></div>
                     </div>
                 </div>
             </div>
@@ -852,6 +852,12 @@
         // Переменные для динамически загружаемых данных
         let conceptArts = [];
         let backstageItems = [];
+        let progressData = {
+            gameplay: 40,
+            art: 4,
+            sound: 10,
+            optimization: 0
+        }; // значения по умолчанию
 
         let currentConceptIndex = 0;
         let progressAnimated = false; // флаг для анимации прогресс-баров
@@ -878,6 +884,63 @@
             } catch (error) {
                 console.error('Ошибка при загрузке из репозитория:', error);
                 return [];
+            }
+        }
+
+        // Функция загрузки config.txt
+        async function loadConfig() {
+            const configUrl = 'https://raw.githubusercontent.com/Simple-Day1/LuminTeamMiniApp/main/config.txt';
+            try {
+                const response = await fetch(configUrl);
+                if (!response.ok) {
+                    console.warn('Не удалось загрузить config.txt, используются значения по умолчанию');
+                    return;
+                }
+                const text = await response.text();
+                // Парсим простой формат: ключ=значение
+                const lines = text.split('\n');
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (line && !line.startsWith('#')) {
+                        const [key, value] = line.split('=').map(s => s.trim());
+                        if (key && value !== undefined) {
+                            const num = parseInt(value, 10);
+                            if (!isNaN(num) && progressData.hasOwnProperty(key)) {
+                                progressData[key] = num;
+                            }
+                        }
+                    }
+                });
+                // Обновляем отображение прогресс-баров
+                updateProgressBars();
+                // Сохраняем в sessionStorage для кэша
+                sessionStorage.setItem('progressData', JSON.stringify(progressData));
+            } catch (error) {
+                console.error('Ошибка загрузки config.txt:', error);
+            }
+        }
+
+        // Обновление значений прогресс-баров на странице
+        function updateProgressBars() {
+            // Обновляем текстовые значения
+            document.querySelectorAll('.progress-value').forEach(el => {
+                const key = el.dataset.key;
+                if (key && progressData.hasOwnProperty(key)) {
+                    el.textContent = progressData[key] + '%';
+                }
+            });
+            // Обновляем атрибуты data-percent у заполнителей
+            document.querySelectorAll('.progress-bar-fill').forEach(el => {
+                const key = el.dataset.key;
+                if (key && progressData.hasOwnProperty(key)) {
+                    el.dataset.percent = progressData[key];
+                }
+            });
+            // Если страница проекта активна, анимируем бары (сбросим флаг для принудительной анимации)
+            if (document.getElementById('projectPage').classList.contains('active')) {
+                // Сбросим флаг, чтобы анимация запустилась снова
+                progressAnimated = false;
+                animateProgressBars();
             }
         }
 
@@ -913,6 +976,15 @@
                     backstageItems = [];
                 }
                 renderBackstageGallery();
+            }
+
+            // Прогресс-данные из config.txt
+            const cachedProgress = sessionStorage.getItem('progressData');
+            if (cachedProgress) {
+                progressData = JSON.parse(cachedProgress);
+                updateProgressBars();
+            } else {
+                await loadConfig();
             }
         }
 
@@ -1019,6 +1091,13 @@
             });
         }
 
+        // Функция сохранения текущей страницы
+        function saveCurrentPage(pageId) {
+            if (pageId) {
+                sessionStorage.setItem('currentPage', pageId);
+            }
+        }
+
         // Переключение страниц
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1028,11 +1107,14 @@
             const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.dataset.page === pageId.replace('Page', ''));
             if (activeBtn) activeBtn.classList.add('active');
 
+            // Сохраняем текущую страницу
+            saveCurrentPage(pageId);
+
             // Если открывается страница проекта и анимация ещё не была выполнена
-            if (pageId === 'projectPage' && !progressAnimated) {
+            if (pageId === 'projectPage') {
+                // Обновим прогресс-бары на случай, если данные изменились
                 setTimeout(() => {
                     animateProgressBars();
-                    progressAnimated = true;
                 }, 50);
             }
 
@@ -1132,15 +1214,24 @@
             tg.BackButton.onClick(() => tg.BackButton.hide());
         }
 
-        // Запуск
+        // Запуск: определяем, какую страницу показать
         renderTeam();
-        loadAllContent(); // асинхронно загрузит и обновит галереи
-        showPage('homePage');
+        loadAllContent(); // асинхронно загрузит и обновит галереи и прогресс
+
+        const savedPage = sessionStorage.getItem('currentPage');
+        if (savedPage && document.getElementById(savedPage)) {
+            showPage(savedPage);
+        } else {
+            showPage('homePage');
+        }
 
         // ===== АВТОМАТИЧЕСКОЕ ОБНОВЛЕНИЕ КАЖДЫЕ 2 МИНУТЫ =====
         const AUTO_RELOAD_INTERVAL = 2 * 60 * 1000; // 2 минуты
 
         let autoReloadTimer = setTimeout(() => {
+            // Сохраняем текущую страницу перед перезагрузкой
+            const activePage = document.querySelector('.page.active')?.id;
+            if (activePage) saveCurrentPage(activePage);
             location.reload();
         }, AUTO_RELOAD_INTERVAL);
 
@@ -1148,6 +1239,8 @@
         function resetAutoReloadTimer() {
             clearTimeout(autoReloadTimer);
             autoReloadTimer = setTimeout(() => {
+                const activePage = document.querySelector('.page.active')?.id;
+                if (activePage) saveCurrentPage(activePage);
                 location.reload();
             }, AUTO_RELOAD_INTERVAL);
         }
@@ -1205,6 +1298,9 @@
             const timeDelta = Date.now() - touchStartTime;
 
             if (deltaY > PULL_THRESHOLD && timeDelta < MAX_PULL_TIME) {
+                // Сохраняем текущую страницу перед перезагрузкой
+                const activePage = document.querySelector('.page.active')?.id;
+                if (activePage) saveCurrentPage(activePage);
                 // Выполняем обновление страницы
                 location.reload();
             }
