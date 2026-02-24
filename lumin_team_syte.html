@@ -1136,6 +1136,79 @@
         renderTeam();
         loadAllContent(); // асинхронно загрузит и обновит галереи
         showPage('homePage');
+
+        // ===== АВТОМАТИЧЕСКОЕ ОБНОВЛЕНИЕ КАЖДЫЕ 2 МИНУТЫ =====
+        const AUTO_RELOAD_INTERVAL = 2 * 60 * 1000; // 2 минуты
+
+        let autoReloadTimer = setTimeout(() => {
+            location.reload();
+        }, AUTO_RELOAD_INTERVAL);
+
+        // Сбрасываем таймер при любом взаимодействии пользователя (опционально)
+        function resetAutoReloadTimer() {
+            clearTimeout(autoReloadTimer);
+            autoReloadTimer = setTimeout(() => {
+                location.reload();
+            }, AUTO_RELOAD_INTERVAL);
+        }
+
+        // События, после которых таймер сбрасывается (чтобы не обновлять во время активности)
+        ['click', 'touchstart', 'mousedown', 'keydown'].forEach(event => {
+            document.addEventListener(event, resetAutoReloadTimer);
+        });
+
+        // ===== PULL-TO-REFRESH НА МОБИЛЬНЫХ =====
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        const PULL_THRESHOLD = 100; // минимальное расстояние свайпа для обновления
+        const MAX_PULL_TIME = 500; // максимальное время свайпа (мс)
+
+        function isAtTop() {
+            return window.scrollY === 0;
+        }
+
+        function isSidebarOpen() {
+            const sidebar = document.getElementById('sidebar');
+            return sidebar.classList.contains('open');
+        }
+
+        document.addEventListener('touchstart', (e) => {
+            if (window.innerWidth > 768) return; // только для мобильных
+            if (isSidebarOpen()) return; // не обновляем при открытом меню
+
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (window.innerWidth > 768) return;
+            if (isSidebarOpen()) return;
+            if (!isAtTop()) return; // только если страница в самом верху
+
+            const touchY = e.touches[0].clientY;
+            const deltaY = touchY - touchStartY;
+
+            // Если тянем вниз и страница вверху – предотвращаем стандартный pull-to-refresh браузера
+            if (deltaY > 0) {
+                e.preventDefault();
+                // Можно добавить визуальный индикатор (опционально)
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', (e) => {
+            if (window.innerWidth > 768) return;
+            if (isSidebarOpen()) return;
+            if (!isAtTop()) return;
+
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaY = touchEndY - touchStartY;
+            const timeDelta = Date.now() - touchStartTime;
+
+            if (deltaY > PULL_THRESHOLD && timeDelta < MAX_PULL_TIME) {
+                // Выполняем обновление страницы
+                location.reload();
+            }
+        });
     </script>
 </body>
 </html>
