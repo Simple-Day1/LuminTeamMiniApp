@@ -635,6 +635,11 @@
             transform: scale(1.05);
         }
 
+        /* ---- добавлено: скрытие кнопки ---- */
+        .menu-toggle.hidden {
+            display: none;
+        }
+
         /* ===== АДАПТИВНОСТЬ ===== */
         @media (max-width: 1024px) {
             .main-content {
@@ -1117,6 +1122,8 @@
 
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('open');
+                // ---- добавлено: показываем кнопку при закрытии сайдбара через навигацию ----
+                document.getElementById('menuToggle').classList.remove('hidden');
             }
         }
 
@@ -1125,15 +1132,20 @@
             btn.addEventListener('click', () => showPage(btn.dataset.page + 'Page'));
         });
 
-        document.getElementById('menuToggle').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            // ---- добавлено: скрываем кнопку и открываем сайдбар ----
+            menuToggle.classList.add('hidden');
+            sidebar.classList.add('open');
         });
 
         document.addEventListener('click', (e) => {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.getElementById('menuToggle');
-            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !toggle.contains(e.target) && sidebar.classList.contains('open')) {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('open')) {
                 sidebar.classList.remove('open');
+                // ---- добавлено: показываем кнопку при закрытии сайдбара ----
+                menuToggle.classList.remove('hidden');
             }
         });
 
